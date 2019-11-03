@@ -4,22 +4,31 @@ using UnityEngine.EventSystems;
 
 namespace danijelhusakovic.bubbleshooter
 {
-    public class InputManager : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler
+    [System.Serializable] public class ClickedEvent: UnityEvent<Vector3> { }
+
+    public class InputManager : MonoBehaviour
     {
-        public UnityEvent Clicked;
+        public ClickedEvent Clicked;
 
-        public void OnPointerClick(PointerEventData eventData)
+        private bool _isPressed;
+
+        private void Awake()
         {
-            Clicked.Invoke();
+            _isPressed = false;
+            Clicked = new ClickedEvent();
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        private void Update()
         {
-
-        }
-
-        public void OnPointerUp(PointerEventData eventData)
-        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                _isPressed = true;
+            }
+            if (_isPressed && Input.GetMouseButtonUp(0))
+            {
+                Clicked.Invoke(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                _isPressed = false;
+            }
 
         }
     }

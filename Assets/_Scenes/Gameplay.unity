@@ -654,6 +654,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43fb4051ae44ee24a8c601f2a794fc45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _speed: 0.1
 --- !u!1 &1189478167
 GameObject:
   m_ObjectHideFlags: 0
@@ -799,6 +800,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _queuedBubbles: {fileID: 860301522}
   _inputManager: {fileID: 680478903}
+  _activeBubble: {fileID: 1144366012}
 --- !u!1 &1641348894
 GameObject:
   m_ObjectHideFlags: 0
