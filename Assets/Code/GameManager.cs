@@ -10,8 +10,9 @@ namespace danijelhusakovic.bubbleshooter
 
         [SerializeField] private QueueManager _queuedBubbles;
         [SerializeField] private InputManager _inputManager;
+        [SerializeField] private BubbleFactory _factory;
 
-        [SerializeField] private Bubble _activeBubble;
+        private Bubble _activeBubble;
 
         private void Awake()
         {
@@ -22,6 +23,7 @@ namespace danijelhusakovic.bubbleshooter
 
         private void OnClick(Vector3 mousePosition)
         {
+            _activeBubble = _queuedBubbles.GetActive();
             _activeBubble.Launch(mousePosition);
         }
 
