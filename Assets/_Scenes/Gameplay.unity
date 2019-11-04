@@ -347,7 +347,7 @@ MonoBehaviour:
   - tag: Bubble
     objectPrefab: {fileID: 5379330655018988695, guid: d6a3d806e0089524981d1d41787a131d,
       type: 3}
-    size: 20
+    InitialSize: 20
 --- !u!1 &680478901
 GameObject:
   m_ObjectHideFlags: 0

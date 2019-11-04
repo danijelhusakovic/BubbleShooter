@@ -9,7 +9,7 @@ public class ObjectPooler : MonoBehaviour
     {
         public string tag;
         public GameObject objectPrefab;
-        public int size;
+        public int InitialSize;
     }
 
     public List<Pool> pools;
@@ -34,7 +34,7 @@ public class ObjectPooler : MonoBehaviour
         {
             Queue<GameObject> objectPool = new Queue<GameObject>();
 
-            for (int i = 0; i < pool.size; i++)
+            for (int i = 0; i < pool.InitialSize; i++)
             {
                 GameObject obj = Instantiate(pool.objectPrefab);
                 obj.SetActive(false);
@@ -55,6 +55,20 @@ public class ObjectPooler : MonoBehaviour
         }
 
         GameObject objToSpawn = poolDictionary[tag].Dequeue();
+        if (objToSpawn == null || objToSpawn.activeInHierarchy)
+        {
+            Pool currentPool = null;
+            foreach (Pool pool in pools)
+            {
+                if (pool.tag.Equals(tag))
+                {
+                    currentPool = pool;
+                    break;
+                }
+            }
+            objToSpawn = Instantiate(currentPool.objectPrefab);
+        }
+
         objToSpawn.SetActive(true);
         objToSpawn.transform.position = position;
         objToSpawn.transform.rotation = rotation;
