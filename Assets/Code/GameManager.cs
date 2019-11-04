@@ -21,10 +21,15 @@ namespace danijelhusakovic.bubbleshooter
             _inputManager.Clicked.AddListener(OnClick);
         }
 
-        private void OnClick(Vector3 mousePosition)
+        private void Start()
         {
             _activeBubble = _queuedBubbles.GetActive();
+        }
+
+        private void OnClick(Vector3 mousePosition)
+        {
             _activeBubble.Launch(mousePosition);
+            _activeBubble = _queuedBubbles.GetActive();
         }
 
     }

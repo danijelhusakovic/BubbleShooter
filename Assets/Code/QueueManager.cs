@@ -21,6 +21,10 @@ namespace danijelhusakovic.bubbleshooter
             _bubblesGOs = new Queue<GameObject>();
             _numBubbles = 3;
             _firstPosition = _rightmostTransform.position;
+        }
+
+        private void Start()
+        {
             InitBubblez();
         }
 
@@ -33,7 +37,6 @@ namespace danijelhusakovic.bubbleshooter
             }
 
             GetActive();
-                
         }
 
         private void AddBubble()
@@ -54,7 +57,6 @@ namespace danijelhusakovic.bubbleshooter
             result = _bubbles.Dequeue();
             GameObject go = _bubblesGOs.Dequeue();
             go.transform.position = _arrow.position;
-
             AddBubble();
             ShiftBubbles();
 
@@ -68,6 +70,5 @@ namespace danijelhusakovic.bubbleshooter
                 go.transform.position += Vector3.right + Vector3.right * _padding;
             }
         }
-
     }
 }
