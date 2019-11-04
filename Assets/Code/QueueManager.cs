@@ -30,8 +30,7 @@ namespace danijelhusakovic.bubbleshooter
 
         private void InitBubblez()
         {
-            // +1 is bubble that is positioned at the arrow immediately.
-            for (int bubbleIndex = 0; bubbleIndex < _numBubbles + 1; bubbleIndex++)
+            for (int bubbleIndex = 0; bubbleIndex < _numBubbles; bubbleIndex++)
             {
                 AddBubble();
             }
@@ -57,8 +56,8 @@ namespace danijelhusakovic.bubbleshooter
             result = _bubbles.Dequeue();
             GameObject go = _bubblesGOs.Dequeue();
             go.transform.position = _arrow.position;
-            AddBubble();
             ShiftBubbles();
+            AddBubble();
 
             return result;
         }
