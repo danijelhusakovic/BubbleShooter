@@ -28,7 +28,7 @@ namespace danijelhusakovic.bubbleshooter
         {
             for (int rowIndex = 0; rowIndex < rows; rowIndex++)
             {
-                for (int columnIndex = 0; columnIndex < _grid.GetLength(1); columnIndex++)
+                for (int columnIndex = 0; columnIndex < _width; columnIndex++)
                 {
                     AddBubble(rowIndex, columnIndex);
                 }
@@ -79,7 +79,81 @@ namespace danijelhusakovic.bubbleshooter
                 thing.position = Vector2.MoveTowards(thing.position, destination, _snapSpeed * Time.deltaTime);
                 yield return new WaitForSeconds(Time.deltaTime);
             } while (thing.position != finalPosition);
+
             AddToGrid(destination, _newestBubble);
+            List<Vector2Int> targetsToDestroy = CheckNeighborCells(destination, thing.GetComponent<Bubble>().Type);
+            DestroyTargets(targetsToDestroy);
+        }
+
+        private void DestroyTargets(List<Vector2Int> targets)
+        {
+            foreach (Vector2Int target in targets)
+            {
+                _grid[target.x, target.y].transform.localScale = Vector2.one * 0.5f;
+            }
+        }
+
+        private List<Vector2Int> CheckNeighborCells(Vector2Int position, BubbleType bubbleType)
+        {
+            Vector2Int checkingPos;
+            List<Vector2Int> results = new List<Vector2Int>();
+            if (position.x > 0)
+            {
+                checkingPos = new Vector2Int(position.x - 1, position.y);
+                if (_grid[checkingPos.x, checkingPos.y] != null)
+                {
+                    if (CheckCell(checkingPos, bubbleType))
+                    {
+                        results.Add(checkingPos);
+                    }
+                }
+            }
+
+
+            if (position.x < _width - 1)
+            {
+                checkingPos = new Vector2Int(position.x + 1, position.y);
+                if (_grid[checkingPos.x, checkingPos.y] != null)
+                {
+                    if (CheckCell(checkingPos, bubbleType))
+                    {
+                        results.Add(checkingPos);
+                    }
+                }
+            }
+
+
+            if (position.y > 0)
+            {
+                checkingPos = new Vector2Int(position.x, position.y - 1);
+                if (_grid[checkingPos.x, checkingPos.y] != null)
+                {
+                    if (CheckCell(checkingPos, bubbleType))
+                    {
+                        results.Add(checkingPos);
+                    }
+                }
+            }
+
+            if (position.y < _height - 1)
+            {
+                checkingPos = new Vector2Int(position.x, position.y + 1);
+                if (_grid[checkingPos.x, checkingPos.y] != null)
+                {
+                    if (CheckCell(checkingPos, bubbleType))
+                    {
+                        results.Add(checkingPos);
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        private bool CheckCell(Vector2Int position, BubbleType type)
+        {
+            if (_grid[position.x, position.y].Type == type) { return true; }
+            return false;
         }
     }
 }

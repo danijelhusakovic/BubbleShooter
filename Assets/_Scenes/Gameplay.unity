@@ -1272,5 +1272,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f86e9a4db846c7046bd4c32bdff509f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _debug: {fileID: 8286569282563099334, guid: 953b3febd8dd96949a9b689bcd84c924, type: 3}
   _bubbleFactory: {fileID: 1496864959}
   _snapSpeed: 1
