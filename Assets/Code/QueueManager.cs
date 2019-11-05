@@ -6,6 +6,8 @@ namespace danijelhusakovic.bubbleshooter
 {
     public class QueueManager : MonoBehaviour
     {
+        public static QueueManager Instance;
+
         [SerializeField] private int _numBubbles;
         [SerializeField] private Transform _rightmostTransform;
         [SerializeField] private Transform _arrow;
@@ -17,6 +19,7 @@ namespace danijelhusakovic.bubbleshooter
 
         private void Awake()
         {
+            Instance = this;
             _bubbles = new Queue<Bubble>();
             _bubblesGOs = new Queue<GameObject>();
             _numBubbles = 3;
@@ -30,12 +33,11 @@ namespace danijelhusakovic.bubbleshooter
 
         private void InitBubblez()
         {
-            for (int bubbleIndex = 0; bubbleIndex < _numBubbles; bubbleIndex++)
+            for (int bubbleIndex = 0; bubbleIndex < _numBubbles + 1; bubbleIndex++)
             {
                 AddBubble();
             }
-
-            GetActive();
+            MoveToArrow(_bubbles.Peek());
         }
 
         private void AddBubble()
@@ -47,19 +49,11 @@ namespace danijelhusakovic.bubbleshooter
 
             _bubblesGOs.Enqueue(go);
             _bubbles.Enqueue(newBubble);
-
         }
 
         public Bubble GetActive()
         {
-            Bubble result = null;
-            result = _bubbles.Dequeue();
-            GameObject go = _bubblesGOs.Dequeue();
-            go.transform.position = _arrow.position;
-            ShiftBubbles();
-            AddBubble();
-
-            return result;
+            return _bubbles.Peek();
         }
 
         private void ShiftBubbles()
@@ -68,6 +62,27 @@ namespace danijelhusakovic.bubbleshooter
             {
                 go.transform.position += Vector3.right + Vector3.right * _padding;
             }
+            MoveToArrow(_bubbles.Peek());
+        }
+
+        public void MoveToArrow(Bubble bubble)
+        {
+            Rigidbody2D rigidbody = bubble.GetComponent<Rigidbody2D>();
+            rigidbody.velocity = Vector2.zero;
+            bubble.transform.position = _arrow.position;
+        }
+
+        private void RemoveActive()
+        {
+            _bubbles.Dequeue();
+            _bubblesGOs.Dequeue();
+        }
+
+        public void ReplenishAndShift()
+        {
+            RemoveActive();
+            ShiftBubbles();
+            AddBubble();
         }
     }
 }
