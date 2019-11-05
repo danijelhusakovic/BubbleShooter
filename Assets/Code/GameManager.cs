@@ -9,6 +9,7 @@ namespace danijelhusakovic.bubbleshooter
         public static GameManager Instance;
 
         [SerializeField] private QueueManager _queuedBubbles;
+        [SerializeField] private GridManager _gridManager;
         [SerializeField] private InputManager _inputManager;
         [SerializeField] private BubbleFactory _factory;
 
@@ -25,12 +26,14 @@ namespace danijelhusakovic.bubbleshooter
         private void Start()
         {
             _activeBubble = _queuedBubbles.GetActive();
+            _gridManager.Initialize(5);
         }
 
         private void OnClick(Vector3 mousePosition)
         {
             _activeBubble.Launch(mousePosition);
             _queuedBubbles.ReplenishAndShift();
+            _gridManager.ListenForCollision(_activeBubble);
             _activeBubble = _queuedBubbles.GetActive();
         }
 

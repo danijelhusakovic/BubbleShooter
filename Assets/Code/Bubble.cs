@@ -5,19 +5,36 @@ using UnityEngine.Events;
 
 namespace danijelhusakovic.bubbleshooter
 {
+    public enum BubbleType
+    {
+        Red,
+        Orange,
+        Blue,
+        Yellow,
+        Green
+    }
+
     [RequireComponent(typeof(Rigidbody2D))]
     public class Bubble : MonoBehaviour, IPooledObject
     {
         [SerializeField] private float _speed;
         private Transform _transform;
         private Rigidbody2D _rigidbody;
+        private BubbleType _type;
+
+        public BubbleType Type { get { return _type; } set { _type = value; } }
+
         public UnityEvent ExitedBottomArea;
+
+        [System.Serializable] public class PositionEvent : UnityEvent<Bubble, Vector3> { }
+        public PositionEvent HitSomething;
 
         private void Awake()
         {
             _transform = transform;
             _rigidbody = GetComponent<Rigidbody2D>();
             ExitedBottomArea = new UnityEvent();
+            HitSomething = new PositionEvent();
         }
 
         public void Launch(Vector3 mousePos)
@@ -40,11 +57,39 @@ namespace danijelhusakovic.bubbleshooter
 
             if (bubble == null && hitTopWall == false) { return; }
             _rigidbody.bodyType = RigidbodyType2D.Static;
+            HitSomething.Invoke(this, transform.position);
         }
 
         public void OnObjectSpawn()
         {
-            GetComponent<SpriteRenderer>().color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+            _type = (BubbleType) Random.Range(0, 5);
+            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+            Color newColor = Color.black;
+
+            switch (_type)
+            {
+                case BubbleType.Blue:
+                    newColor = Color.blue;
+                    break;
+                case BubbleType.Green:
+                    newColor = Color.green;
+                    break;
+                case BubbleType.Orange:
+                    newColor = new Color(0.9764f, 0.4157f, 0.0549f);
+                    break;
+                case BubbleType.Red:
+                    newColor = Color.red;
+                    break;
+                case BubbleType.Yellow:
+                    newColor = Color.yellow;
+                    break;
+                default:
+                    newColor = Color.black;
+                    break;
+            }
+
+
+            spriteRenderer.color = newColor;
         }
     }
 }
