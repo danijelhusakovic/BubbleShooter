@@ -30,6 +30,16 @@ namespace danijelhusakovic.bubbleshooter
         private void OnTriggerExit2D(Collider2D collider)
         {
             if (collider.gameObject.tag.Equals("BottomArea") == false) { return; }
+            GetComponent<CircleCollider2D>().isTrigger = false;
+        }
+
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            Bubble bubble = collision.gameObject.GetComponent<Bubble>();
+            bool hitTopWall = collision.gameObject.tag.Equals("TopWall");
+
+            if (bubble == null && hitTopWall == false) { return; }
+            _rigidbody.bodyType = RigidbodyType2D.Static;
         }
 
         public void OnObjectSpawn()
