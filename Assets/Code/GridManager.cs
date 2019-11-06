@@ -67,93 +67,21 @@ namespace danijelhusakovic.bubbleshooter
         private void AddAndSnap(Bubble bubble, Vector3 positionOnCollision)
         {
             Vector2Int newPos = new Vector2Int(Mathf.RoundToInt(positionOnCollision.x), Mathf.RoundToInt(positionOnCollision.y));
-            //if (_grid[newPos.y - 1, newPos.x - 1] != null) { Debug.LogError("Tried snapping, but grid already has a bubble here."); return; }
             StartCoroutine(SnapToGrid(bubble.transform, newPos));
         }
 
-        private IEnumerator SnapToGrid(Transform thing, Vector2Int destination)
+        private IEnumerator SnapToGrid(Transform bubbleTransform, Vector2Int destination)
         {
-            Vector3 finalPosition = new Vector3(destination.y, destination.x, 0f);
+            Vector3 finalPosition = new Vector3(destination.x, destination.y, 0f);
             do
             {
-                thing.position = Vector2.MoveTowards(thing.position, destination, _snapSpeed * Time.deltaTime);
+                bubbleTransform.position = Vector2.MoveTowards(bubbleTransform.position, destination, _snapSpeed * Time.deltaTime);
                 yield return new WaitForSeconds(Time.deltaTime);
-            } while (thing.position != finalPosition);
+            } while (bubbleTransform.position != finalPosition);
 
-            AddToGrid(destination, _newestBubble);
-            List<Vector2Int> targetsToDestroy = CheckNeighborCells(destination, thing.GetComponent<Bubble>().Type);
-            DestroyTargets(targetsToDestroy);
-        }
-
-        private void DestroyTargets(List<Vector2Int> targets)
-        {
-            foreach (Vector2Int target in targets)
-            {
-                _grid[target.x, target.y].transform.localScale = Vector2.one * 0.5f;
-            }
-        }
-
-        private List<Vector2Int> CheckNeighborCells(Vector2Int position, BubbleType bubbleType)
-        {
-            Vector2Int checkingPos;
-            List<Vector2Int> results = new List<Vector2Int>();
-            if (position.x > 0)
-            {
-                checkingPos = new Vector2Int(position.x - 1, position.y);
-                if (_grid[checkingPos.x, checkingPos.y] != null)
-                {
-                    if (CheckCell(checkingPos, bubbleType))
-                    {
-                        results.Add(checkingPos);
-                    }
-                }
-            }
-
-
-            if (position.x < _width - 1)
-            {
-                checkingPos = new Vector2Int(position.x + 1, position.y);
-                if (_grid[checkingPos.x, checkingPos.y] != null)
-                {
-                    if (CheckCell(checkingPos, bubbleType))
-                    {
-                        results.Add(checkingPos);
-                    }
-                }
-            }
-
-
-            if (position.y > 0)
-            {
-                checkingPos = new Vector2Int(position.x, position.y - 1);
-                if (_grid[checkingPos.x, checkingPos.y] != null)
-                {
-                    if (CheckCell(checkingPos, bubbleType))
-                    {
-                        results.Add(checkingPos);
-                    }
-                }
-            }
-
-            if (position.y < _height - 1)
-            {
-                checkingPos = new Vector2Int(position.x, position.y + 1);
-                if (_grid[checkingPos.x, checkingPos.y] != null)
-                {
-                    if (CheckCell(checkingPos, bubbleType))
-                    {
-                        results.Add(checkingPos);
-                    }
-                }
-            }
-
-            return results;
-        }
-
-        private bool CheckCell(Vector2Int position, BubbleType type)
-        {
-            if (_grid[position.x, position.y].Type == type) { return true; }
-            return false;
+            Debug.Log("Snapped to grid");
+            Vector2Int posInGrid = new Vector2Int(_height - destination.y - 1, destination.x - 1);
+            AddToGrid(posInGrid, _newestBubble);
         }
     }
 }
