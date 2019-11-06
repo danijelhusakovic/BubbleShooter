@@ -21,6 +21,7 @@ namespace danijelhusakovic.bubbleshooter
         private Transform _transform;
         private Rigidbody2D _rigidbody;
         private BubbleType _type;
+        private bool _hasHitSomething;
 
         public BubbleType Type { get { return _type; } set { _type = value; } }
 
@@ -35,6 +36,7 @@ namespace danijelhusakovic.bubbleshooter
             _rigidbody = GetComponent<Rigidbody2D>();
             ExitedBottomArea = new UnityEvent();
             HitSomething = new PositionEvent();
+            _hasHitSomething = false;
         }
 
         public void Launch(Vector3 mousePos)
@@ -57,7 +59,11 @@ namespace danijelhusakovic.bubbleshooter
 
             if (bubble == null && hitTopWall == false) { return; }
             _rigidbody.bodyType = RigidbodyType2D.Static;
-            HitSomething.Invoke(this, transform.position);
+            if (_hasHitSomething == false)
+            {
+                HitSomething.Invoke(this, transform.position);
+                _hasHitSomething = true;
+            }
         }
 
         public void OnObjectSpawn()
@@ -88,8 +94,17 @@ namespace danijelhusakovic.bubbleshooter
                     break;
             }
 
-
             spriteRenderer.color = newColor;
+        }
+
+        public bool CompareTypes(Bubble other)
+        {
+            return _type == other.Type;
+        }
+
+        public void Pop()
+        {
+            GetComponent<SpriteRenderer>().color = Color.black;
         }
     }
 }

@@ -11,7 +11,6 @@ namespace danijelhusakovic.bubbleshooter
         [SerializeField] private BubbleFactory _bubbleFactory;
         [SerializeField] private float _snapSpeed;
         private Bubble[,] _grid;
-        private Bubble _newestBubble;
 
         private int _height;
         private int _width;
@@ -46,7 +45,6 @@ namespace danijelhusakovic.bubbleshooter
 
         public void AddToGrid(Vector2Int position, Bubble bubble)
         {
-            _newestBubble = bubble;
             _grid[position.x, position.y] = bubble;
         }
 
@@ -60,7 +58,6 @@ namespace danijelhusakovic.bubbleshooter
 
         public void ListenForCollision(Bubble bubble)
         {
-            _newestBubble = bubble;
             bubble.HitSomething.AddListener(AddAndSnap);
         }
 
@@ -80,8 +77,114 @@ namespace danijelhusakovic.bubbleshooter
             } while (bubbleTransform.position != finalPosition);
 
             Debug.Log("Snapped to grid");
-            Vector2Int posInGrid = new Vector2Int(_height - destination.y - 1, destination.x - 1);
-            AddToGrid(posInGrid, _newestBubble);
+            Vector2Int posInGrid = new Vector2Int(_height - destination.y, destination.x - 1);
+            AddToGrid(posInGrid, bubbleTransform.GetComponent<Bubble>());
+            FindNeighbors(posInGrid);
+        }
+
+        private void FindNeighbors(Vector2Int location)
+        {
+            List<Bubble> results = new List<Bubble>();
+
+            Bubble thisBubble = _grid[location.x, location.y];
+
+            // Check up.
+            if (location.x > 0)
+            {
+                Bubble up = _grid[location.x - 1, location.y];
+                if (up != null)
+                {
+                    bool isMatch = thisBubble.CompareTypes(up);
+                    if (isMatch) { results.Add(up); }
+                }
+            }
+
+            // Check down.
+            if(location.x < _height - 1)
+            {
+                Bubble down = _grid[location.x + 1, location.y];
+                if (down != null)
+                {
+                    bool isMatch = thisBubble.CompareTypes(down);
+                    if (isMatch) { results.Add(down); }
+                }
+            }
+
+            // Check left.
+            if (location.y > 0)
+            {
+                Bubble left = _grid[location.x, location.y - 1];
+                if (left != null)
+                {
+                    bool isMatch = thisBubble.CompareTypes(left);
+                    if (isMatch) { results.Add(left); }
+                }
+            }
+
+            // Check right.
+            if (location.y < _width - 1)
+            {
+                Bubble right = _grid[location.x, location.y + 1];
+                if (right != null)
+                {
+                    bool isMatch = thisBubble.CompareTypes(right);
+                    if (isMatch) { results.Add(right); }
+                }
+            }
+
+            // Check diagonal up right.
+            if (location.x > 0 && location.y < _width - 1)
+            {
+                Bubble upRight = _grid[location.x - 1, location.y + 1];
+                if (upRight != null)
+                {
+                    bool isMatch = thisBubble.CompareTypes(upRight);
+                    if (isMatch) { results.Add(upRight); }
+                }
+            }
+
+            // Check diagonal down right.
+            if (location.x < _height - 1 && location.y < _width - 1)
+            {
+                Bubble downRight = _grid[location.x + 1, location.y + 1];
+                if (downRight != null)
+                {
+                    bool isMatch = thisBubble.CompareTypes(downRight);
+                    if (isMatch) { results.Add(downRight); }
+                }
+            }
+
+            // Check diagonal down left.
+            if (location.x < _height - 1 && location.y > 0)
+            {
+                Bubble downLeft = _grid[location.x + 1, location.y - 1];
+                if (downLeft != null)
+                {
+                    bool isMatch = thisBubble.CompareTypes(downLeft);
+                    if (isMatch) { results.Add(downLeft); }
+                }
+            }
+
+            // Check diagonal up left.
+            if (location.x > 0 && location.y > 0)
+            {
+                Bubble upLeft = _grid[location.x - 1, location.y - 1];
+                if (upLeft != null)
+                {
+                    bool isMatch = thisBubble.CompareTypes(upLeft);
+                    if (isMatch) { results.Add(upLeft); }
+                }
+            }
+
+            DestroyBubbles(results);
+        }
+
+        private void DestroyBubbles(List<Bubble> targets)
+        {
+            foreach (Bubble bubble in targets)
+            {
+                bubble.Pop();
+            }
         }
     }
 }
