@@ -24,6 +24,7 @@ namespace danijelhusakovic.bubbleshooter
         private bool _hasHitSomething;
 
         public BubbleType Type { get { return _type; } set { _type = value; } }
+        public bool WasChecked = false;
 
         public UnityEvent ExitedBottomArea;
 
@@ -102,7 +103,7 @@ namespace danijelhusakovic.bubbleshooter
             return _type == other.Type;
         }
 
-        public void Pop()
+        public void Explode()
         {
             GetComponent<SpriteRenderer>().color = Color.black;
         }

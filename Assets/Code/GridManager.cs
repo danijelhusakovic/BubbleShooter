@@ -76,17 +76,58 @@ namespace danijelhusakovic.bubbleshooter
                 yield return new WaitForSeconds(Time.deltaTime);
             } while (bubbleTransform.position != finalPosition);
 
-            Debug.Log("Snapped to grid");
             Vector2Int posInGrid = new Vector2Int(_height - destination.y, destination.x - 1);
             AddToGrid(posInGrid, bubbleTransform.GetComponent<Bubble>());
-            FindNeighbors(posInGrid);
+
+            List<Bubble> toDestroy = FindAllRecursiveNeighbors(posInGrid);
+
+            foreach (Bubble bubble in toDestroy)
+            {
+                bubble.Explode();
+                RemoveFromGrid(FindPositionOfBubble(bubble));
+            }
         }
 
-        private void FindNeighbors(Vector2Int location)
+        private List<Bubble> FindAllRecursiveNeighbors(Vector2Int originPosition, List<Bubble> result = null)
+        {
+            List<Bubble> allNeighbors = FindNeighbors(originPosition);
+
+            if (result == null)
+                // Mark (see bellow)
+                result = new List<Bubble>();
+
+            List<Bubble> newBubbles = new List<Bubble>();
+            foreach (Bubble bubble in allNeighbors)
+            {
+                if (!result.Contains(bubble))
+                {
+                    result.Add(bubble);
+                    newBubbles.Add(bubble);
+                }
+            }
+
+            // Recursion starts here.
+            foreach (Bubble bubble in newBubbles)
+            {
+                List<Bubble> neighbors = FindAllRecursiveNeighbors(FindPositionOfBubble(bubble), result);
+            }
+
+            return result;
+        }
+
+        private void DestroyBubble(Bubble bubble)
+        {
+            bubble.Explode();
+            Vector2Int positionOfBubble = FindPositionOfBubble(bubble);
+            RemoveFromGrid(positionOfBubble);
+        }
+
+        private List<Bubble> FindNeighbors(Vector2Int location)
         {
             List<Bubble> results = new List<Bubble>();
 
             Bubble thisBubble = _grid[location.x, location.y];
+            if (thisBubble == null) { return null; }
 
             // Check up.
             if (location.x > 0)
@@ -141,6 +182,7 @@ namespace danijelhusakovic.bubbleshooter
                     bool isMatch = thisBubble.CompareTypes(upRight);
                     if (isMatch) { results.Add(upRight); }
                 }
+
             }
 
             // Check diagonal down right.
@@ -176,15 +218,25 @@ namespace danijelhusakovic.bubbleshooter
                 }
             }
 
-            DestroyBubbles(results);
+            return results;
         }
 
-        private void DestroyBubbles(List<Bubble> targets)
+        private Vector2Int FindPositionOfBubble(Bubble bubble)
         {
-            foreach (Bubble bubble in targets)
+            Vector2Int result = Vector2Int.zero;
+
+            for (int rowIndex = 0; rowIndex < _height; rowIndex++)
             {
-                bubble.Pop();
+                for (int columnIndex = 0; columnIndex < _width; columnIndex++)
+                {
+                    if (_grid[rowIndex, columnIndex] == bubble)
+                    {
+                        result = new Vector2Int(rowIndex, columnIndex);
+                    }
+                }
             }
+
+            return result;
         }
     }
 }
