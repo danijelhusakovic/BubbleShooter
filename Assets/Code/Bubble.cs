@@ -105,7 +105,7 @@ namespace danijelhusakovic.bubbleshooter
 
         public void Explode()
         {
-            GetComponent<SpriteRenderer>().color = Color.black;
+            Destroy(gameObject);
         }
     }
 }

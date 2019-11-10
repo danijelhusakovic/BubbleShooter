@@ -96,7 +96,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _speed: 150
+  WasChecked: 0
   ExitedBottomArea:
+    m_PersistentCalls:
+      m_Calls: []
+  HitSomething:
     m_PersistentCalls:
       m_Calls: []
 --- !u!58 &5135418738540008882
@@ -134,5 +138,5 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0

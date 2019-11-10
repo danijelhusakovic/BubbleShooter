@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace danijelhusakovic.bubbleshooter
 {
@@ -15,21 +16,47 @@ namespace danijelhusakovic.bubbleshooter
         private int _height;
         private int _width;
 
+        public class HitMade : UnityEvent<bool> { }
+        public HitMade OnHit;
+
         private void Awake()
         {
             Instance = this;
             _grid = new Bubble[12, 18];
             _height = _grid.GetLength(0);
             _width = _grid.GetLength(1);
+            OnHit = new HitMade();
         }
 
         public void Initialize(int rows)
+        {
+            AddRowsFromTop(rows);
+        }
+
+        public void AddRowsFromTop(int rows)
         {
             for (int rowIndex = 0; rowIndex < rows; rowIndex++)
             {
                 for (int columnIndex = 0; columnIndex < _width; columnIndex++)
                 {
                     AddBubble(rowIndex, columnIndex);
+                }
+            }
+        }
+
+        public void ShiftDown(int amount)
+        {
+            // Searching from bottom up.
+            for (int rowIndex = _height - 1; rowIndex >= 0; rowIndex--)
+            {
+                for (int columnIndex = 0; columnIndex < _width; columnIndex++)
+                {
+                    Bubble currentBubble = _grid[rowIndex, columnIndex];
+                    if (currentBubble == null) { continue; }
+                    if (rowIndex == _height - 1) { GameManager.Instance.GameState = StateType.GameOver; break; }
+                    _grid[rowIndex + 1, columnIndex] = currentBubble;
+                    _grid[rowIndex, columnIndex] = null;
+                    currentBubble.transform.position += Vector3.down * amount;
                 }
             }
         }
@@ -67,6 +94,26 @@ namespace danijelhusakovic.bubbleshooter
             StartCoroutine(SnapToGrid(bubble.transform, newPos));
         }
 
+        private void RemoveDetachedBubbles()
+        {
+            List<Bubble> result = new List<Bubble>();
+            List<Bubble> checkedBubbles = new List<Bubble>();
+            bool areAttached = false;
+
+            foreach (Bubble bubble in _grid)
+            {
+                if (checkedBubbles.Contains(bubble)) { continue; }
+                foreach (Bubble neighbour in result)
+                {
+                    if (checkedBubbles.Contains(neighbour)) { continue; }
+                    else
+                    {
+                        checkedBubbles.Add(neighbour);
+                    }
+                }
+            }
+        }
+
         private IEnumerator SnapToGrid(Transform bubbleTransform, Vector2Int destination)
         {
             Vector3 finalPosition = new Vector3(destination.x, destination.y, 0f);
@@ -81,20 +128,27 @@ namespace danijelhusakovic.bubbleshooter
 
             List<Bubble> toDestroy = FindAllRecursiveNeighbors(posInGrid);
 
-            foreach (Bubble bubble in toDestroy)
+            if (toDestroy.Count >= 3)
             {
-                bubble.Explode();
-                RemoveFromGrid(FindPositionOfBubble(bubble));
+                OnHit.Invoke(true);
+                foreach (Bubble bubble in toDestroy)
+                {
+                    bubble.Explode();
+                    RemoveFromGrid(FindPositionOfBubble(bubble));
+                }
+                RemoveDetachedBubbles();
+            }
+            else
+            {
+                OnHit.Invoke(false);
             }
         }
 
-        private List<Bubble> FindAllRecursiveNeighbors(Vector2Int originPosition, List<Bubble> result = null)
+        private List<Bubble> FindAllRecursiveNeighbors(Vector2Int originPosition, List<Bubble> result = null, bool isCheckingColor = true)
         {
-            List<Bubble> allNeighbors = FindNeighbors(originPosition);
+            List<Bubble> allNeighbors = FindNeighbors(originPosition, isCheckingColor);
 
-            if (result == null)
-                // Mark (see bellow)
-                result = new List<Bubble>();
+            if (result == null) { result = new List<Bubble>(); }
 
             List<Bubble> newBubbles = new List<Bubble>();
             foreach (Bubble bubble in allNeighbors)
@@ -122,7 +176,7 @@ namespace danijelhusakovic.bubbleshooter
             RemoveFromGrid(positionOfBubble);
         }
 
-        private List<Bubble> FindNeighbors(Vector2Int location)
+        private List<Bubble> FindNeighbors(Vector2Int location, bool isCheckingColor = true)
         {
             List<Bubble> results = new List<Bubble>();
 
@@ -136,7 +190,7 @@ namespace danijelhusakovic.bubbleshooter
                 if (up != null)
                 {
                     bool isMatch = thisBubble.CompareTypes(up);
-                    if (isMatch) { results.Add(up); }
+                    if (isMatch || !isCheckingColor) { results.Add(up); }
                 }
             }
 
@@ -147,7 +201,7 @@ namespace danijelhusakovic.bubbleshooter
                 if (down != null)
                 {
                     bool isMatch = thisBubble.CompareTypes(down);
-                    if (isMatch) { results.Add(down); }
+                    if (isMatch || !isCheckingColor) { results.Add(down); }
                 }
             }
 
@@ -158,7 +212,7 @@ namespace danijelhusakovic.bubbleshooter
                 if (left != null)
                 {
                     bool isMatch = thisBubble.CompareTypes(left);
-                    if (isMatch) { results.Add(left); }
+                    if (isMatch || !isCheckingColor) { results.Add(left); }
                 }
             }
 
@@ -169,7 +223,7 @@ namespace danijelhusakovic.bubbleshooter
                 if (right != null)
                 {
                     bool isMatch = thisBubble.CompareTypes(right);
-                    if (isMatch) { results.Add(right); }
+                    if (isMatch || !isCheckingColor) { results.Add(right); }
                 }
             }
 
